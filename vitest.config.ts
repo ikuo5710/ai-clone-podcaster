@@ -8,6 +8,7 @@ export default defineConfig({
       'src/**/*.{test,spec}.{ts,tsx}',
       'tests/**/*.{test,spec}.{ts,tsx}',
     ],
+    exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -17,6 +18,7 @@ export default defineConfig({
         '.steering/**',
         '**/*.config.{ts,js}',
         '**/types/**',
+        'tests/e2e/**',
       ],
       thresholds: {
         branches: 80,
