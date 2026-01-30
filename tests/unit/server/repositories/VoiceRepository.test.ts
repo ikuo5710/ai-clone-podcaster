@@ -4,37 +4,23 @@ import path from 'node:path';
 import { VoiceRepository } from '../../../../src/server/repositories/VoiceRepository.js';
 import { NotFoundError } from '../../../../src/server/types/errors.js';
 
-// テスト用に一時ディレクトリを使う
-const TEST_DATA_DIR = path.resolve('data', 'voices');
+const TEST_DATA_DIR = path.resolve('data', 'test-voices-repo');
 
 describe('VoiceRepository', () => {
   let repository: VoiceRepository;
 
   beforeEach(async () => {
-    repository = new VoiceRepository();
+    repository = new VoiceRepository(TEST_DATA_DIR);
     await repository.ensureDataDir();
-    // テスト前にvoices.jsonをクリア
-    const voicesJsonPath = path.join(TEST_DATA_DIR, 'voices.json');
-    await fs.writeFile(voicesJsonPath, JSON.stringify({ voices: [] }, null, 2));
   });
 
   afterEach(async () => {
-    // テスト後にvoices.jsonをクリア + 生成ファイルを削除
-    const voicesJsonPath = path.join(TEST_DATA_DIR, 'voices.json');
+    // テスト後にディレクトリを削除
     try {
-      const raw = await fs.readFile(voicesJsonPath, 'utf-8');
-      const data = JSON.parse(raw) as { voices: { fileName: string }[] };
-      for (const voice of data.voices) {
-        try {
-          await fs.unlink(path.join(TEST_DATA_DIR, voice.fileName));
-        } catch {
-          // ignore
-        }
-      }
+      await fs.rm(TEST_DATA_DIR, { recursive: true, force: true });
     } catch {
       // ignore
     }
-    await fs.writeFile(voicesJsonPath, JSON.stringify({ voices: [] }, null, 2));
   });
 
   describe('findAll', () => {

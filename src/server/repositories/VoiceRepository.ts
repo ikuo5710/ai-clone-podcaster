@@ -4,21 +4,31 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Voice } from '../types/voice.js';
 import { NotFoundError } from '../types/errors.js';
 
-const DATA_DIR = path.resolve('data', 'voices');
-const VOICES_JSON = path.join(DATA_DIR, 'voices.json');
+const DEFAULT_DATA_DIR = path.resolve('data', 'voices');
 
 interface VoicesData {
   voices: Voice[];
 }
 
 export class VoiceRepository {
+  private readonly dataDir: string;
+  private readonly voicesJsonPath: string;
+
+  constructor(dataDir?: string) {
+    this.dataDir = dataDir ?? DEFAULT_DATA_DIR;
+    this.voicesJsonPath = path.join(this.dataDir, 'voices.json');
+  }
+
   /** data/voices/ ディレクトリとvoices.jsonの初期化 */
   async ensureDataDir(): Promise<void> {
-    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.mkdir(this.dataDir, { recursive: true });
     try {
-      await fs.access(VOICES_JSON);
+      await fs.access(this.voicesJsonPath);
     } catch {
-      await fs.writeFile(VOICES_JSON, JSON.stringify({ voices: [] }, null, 2));
+      await fs.writeFile(
+        this.voicesJsonPath,
+        JSON.stringify({ voices: [] }, null, 2)
+      );
     }
   }
 
@@ -45,7 +55,7 @@ export class VoiceRepository {
     const id = uuidv4();
     const ext = this.extensionFromMime(mimeType);
     const fileName = `${id}${ext}`;
-    const filePath = path.join(DATA_DIR, fileName);
+    const filePath = path.join(this.dataDir, fileName);
 
     await fs.writeFile(filePath, audioBuffer);
 
@@ -73,7 +83,7 @@ export class VoiceRepository {
     }
 
     const voice = data.voices[index];
-    const filePath = path.join(DATA_DIR, voice.fileName);
+    const filePath = path.join(this.dataDir, voice.fileName);
 
     try {
       await fs.unlink(filePath);
@@ -87,12 +97,12 @@ export class VoiceRepository {
 
   /** 音声ファイルの絶対パスを取得する */
   getFilePath(voice: Voice): string {
-    return path.join(DATA_DIR, voice.fileName);
+    return path.join(this.dataDir, voice.fileName);
   }
 
   private async readVoicesJson(): Promise<VoicesData> {
     try {
-      const raw = await fs.readFile(VOICES_JSON, 'utf-8');
+      const raw = await fs.readFile(this.voicesJsonPath, 'utf-8');
       return JSON.parse(raw) as VoicesData;
     } catch {
       return { voices: [] };
@@ -100,7 +110,7 @@ export class VoiceRepository {
   }
 
   private async writeVoicesJson(data: VoicesData): Promise<void> {
-    await fs.writeFile(VOICES_JSON, JSON.stringify(data, null, 2));
+    await fs.writeFile(this.voicesJsonPath, JSON.stringify(data, null, 2));
   }
 
   private extensionFromMime(mimeType: string): string {

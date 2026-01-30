@@ -6,19 +6,15 @@ import { createVoiceRoutes } from '../../../../src/server/controllers/VoiceContr
 import { VoiceRepository } from '../../../../src/server/repositories/VoiceRepository.js';
 import { ValidationError, NotFoundError } from '../../../../src/server/types/errors.js';
 
-const TEST_DATA_DIR = path.resolve('data', 'voices');
+const TEST_DATA_DIR = path.resolve('data', 'test-voices-ctrl');
 
 describe('VoiceController', () => {
   let app: Hono;
   let repository: VoiceRepository;
 
   beforeEach(async () => {
-    repository = new VoiceRepository();
+    repository = new VoiceRepository(TEST_DATA_DIR);
     await repository.ensureDataDir();
-    await fs.writeFile(
-      path.join(TEST_DATA_DIR, 'voices.json'),
-      JSON.stringify({ voices: [] }, null, 2)
-    );
 
     app = new Hono();
     app.route('/api/voices', createVoiceRoutes(repository));
@@ -37,25 +33,10 @@ describe('VoiceController', () => {
 
   afterEach(async () => {
     try {
-      const raw = await fs.readFile(
-        path.join(TEST_DATA_DIR, 'voices.json'),
-        'utf-8'
-      );
-      const data = JSON.parse(raw) as { voices: { fileName: string }[] };
-      for (const voice of data.voices) {
-        try {
-          await fs.unlink(path.join(TEST_DATA_DIR, voice.fileName));
-        } catch {
-          // ignore
-        }
-      }
+      await fs.rm(TEST_DATA_DIR, { recursive: true, force: true });
     } catch {
       // ignore
     }
-    await fs.writeFile(
-      path.join(TEST_DATA_DIR, 'voices.json'),
-      JSON.stringify({ voices: [] }, null, 2)
-    );
   });
 
   function createMultipartFormData(
