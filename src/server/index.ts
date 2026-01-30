@@ -2,6 +2,7 @@ import 'dotenv/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { createVoiceRoutes } from './controllers/VoiceController.js';
 import { createPodcastRoutes } from './controllers/PodcastController.js';
@@ -25,6 +26,9 @@ await fs.mkdir(path.resolve('data', 'output'), { recursive: true });
 // ルーティング
 app.route('/api/voices', createVoiceRoutes(voiceRepository));
 app.route('/api/podcasts', createPodcastRoutes(voiceRepository, ttsService, audioMixer));
+
+// 静的ファイル配信（本番用: dist/client/）
+app.use('/*', serveStatic({ root: './dist/client' }));
 
 // グローバルエラーハンドラ
 app.onError((err, c) => {
