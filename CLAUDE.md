@@ -85,6 +85,123 @@
 - `design.md`: 変更内容の設計
 - `tasklist.md`: タスクリスト
 
+### タスクの管理
+
+タスクの実行時は.steeringを作成するが、beadsも並行で記録する。
+これは今後beadsに移行することを見据えた試験運用である。
+
+目的：
+- 調査・意思決定・ブロッカー・次アクションを beads(bd) に短く記録し、
+  個人の複数端末間で `bd sync` により同期する。
+- `.beads/*.jsonl` は main/feature に混ぜず、同期は beads-sync に寄せる。
+
+========================
+0) 毎回の開始（必須）
+========================
+1) git をクリーンにする
+- 実行: `git status`
+- uncommitted changes がある場合は私に「commit / stash が必要」と伝えて止まる
+
+2) beads 同期（取り込み）
+- 実行: `bd sync`
+
+========================
+1) Issue の作り方（起点）
+========================
+新しい作業単位は必ず Issue を作る。IDを以後の記録に使う。
+
+- すぐIDが欲しい（推奨）:
+  `bd q "<TITLE>"`
+
+- 通常作成:
+  `bd create "<TITLE>"`
+
+タイトル例：
+- "ai-clone-podcaster: fix episode ordering bug"
+- "ai-clone-podcaster: add RSS metadata (itunes)"
+
+========================
+2) 着手・進捗更新（固定コマンド）
+========================
+着手（原子操作で安全）：
+- `bd update <ISSUE_ID> --claim`
+
+状態更新：
+- `bd update <ISSUE_ID> -s open`
+- `bd update <ISSUE_ID> -s in_progress`
+- `bd update <ISSUE_ID> -s blocked`（必要なら）
+- `bd update <ISSUE_ID> -s closed`（通常は close を使う）
+
+優先度・期限（任意）：
+- `bd update <ISSUE_ID> -p P1`
+- `bd update <ISSUE_ID> --due "tomorrow"`
+- `bd update <ISSUE_ID> --due "+2d"`
+
+メモ追記（短く、要点のみ）：
+- `bd update <ISSUE_ID> --append-notes "…"`
+
+========================
+3) 作業中に必ず記録するイベント（必須）
+========================
+以下のイベントが起きたら、必ずコメントで残す（最大5行）。
+
+フォーマット（英語ラベル＋日本語本文）：
+- "DECISION: …"
+- "ROOT CAUSE: …"
+- "BLOCKER: …"
+- "LEARNED: …"
+- "NEXT: …"
+
+コマンド（固定）：
+- `bd comments add <ISSUE_ID> "DECISION: …"`
+- `bd comments add <ISSUE_ID> "ROOT CAUSE: …"`
+- `bd comments add <ISSUE_ID> "BLOCKER: …"`
+- `bd comments add <ISSUE_ID> "LEARNED: …"`
+- `bd comments add <ISSUE_ID> "NEXT: …"`
+
+例：
+- `bd comments add bd-123 "DECISION: 音声生成はA→Bに変更（品質とコストの均衡）"`
+- `bd comments add bd-123 "ROOT CAUSE: feed.xml生成でTZがUTC固定になっていた"`
+- `bd comments add bd-123 "NEXT: 1) 修正 2) 回帰テスト 3) リリース"`
+
+========================
+4) 完了（固定）
+========================
+完了は close を使う。理由を必ず残す。
+
+- `bd close <ISSUE_ID> --reason "…"`
+便利オプション：
+- 次にやるべき候補を出す：`--suggest-next`
+- 例：`bd close bd-123 --reason "Fixed + added tests" --suggest-next`
+
+========================
+5) ブランチ運用（絶対）
+========================
+- main/feature ブランチに `.beads/*.jsonl` を混ぜない
+- もし混入したら即除外：
+  - `git restore --staged .beads`（stage済みの場合）
+  - `git restore .beads`（作業ツリーの変更を戻す）
+- `.beads/config.yaml` は main に含めてよい（設定共有）
+
+========================
+6) 毎回の終了（必須）
+========================
+1) `git status` を確認（汚れていたら私に確認して止まる）
+2) beads を同期（吐き出し）：
+   - `bd sync`
+3) 可能なら健康チェック：
+   - `bd doctor`
+   - error があれば具体的な修正手順を提示する
+
+========================
+7) 止まって私に確認する条件（ガードレール）
+========================
+- `bd sync` 中に rebase/merge/conflict が出た
+- `git status` が汚れているのに `bd sync` が必要になった
+- `.beads/*.jsonl` が main/feature に混入した
+- `bd doctor` が Sync Divergence を繰り返し検出する
+
+
 ## 開発プロセス
 
 ### 初回セットアップ
