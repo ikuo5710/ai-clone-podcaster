@@ -55,16 +55,24 @@ export class TTSService {
 
   private extractAudioUrl(output: unknown): string {
     // Replicate APIの返り値はモデルにより異なるが、
-    // qwen3-ttsはURLまたはReadableStreamを返す
+    // qwen3-ttsはURLまたはFileOutput(ReadableStream)を返す
     if (typeof output === 'string') {
       return output;
     }
-    if (output && typeof output === 'object' && 'url' in output) {
-      return (output as { url: string }).url;
-    }
-    if (output && typeof output === 'object' && Symbol.asyncIterator in Object(output)) {
-      // FileOutputの場合、URL()で文字列化可能
-      return String(output);
+    if (output && typeof output === 'object') {
+      // FileOutputの場合、url()メソッドでURLを取得
+      if ('url' in output && typeof (output as { url: unknown }).url === 'function') {
+        const url = (output as { url: () => URL }).url();
+        return url.toString();
+      }
+      // urlプロパティが文字列の場合
+      if ('url' in output && typeof (output as { url: unknown }).url === 'string') {
+        return (output as { url: string }).url;
+      }
+      // toString()がオーバーライドされている場合（FileOutput.toString()はURLを返す）
+      if ('toString' in output) {
+        return String(output);
+      }
     }
     throw new Error(
       `Unexpected Replicate API output format: ${typeof output}`

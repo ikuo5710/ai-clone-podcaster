@@ -38,6 +38,10 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+test-results/
+
+# Resources (large binary files)
+resource/
 
 # Steering files (task management - temporary)
 .steering/*
