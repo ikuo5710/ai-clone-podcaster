@@ -93,7 +93,7 @@
   - `bd comments add <ID> "BLOCKER: …"`
   - `bd comments add <ID> "LEARNED: …"`
   - `bd comments add <ID> "NEXT: …"`
-- 完了: `bd close <ID> --reason "…"`
+- 完了: `bd close <ID> --reason "…"` し、対応する GitHub Issue のチェックリスト項目を `- [x]` に更新する（`gh issue edit` で body を更新）
 
 **コミット・PR:**
 - コミットメッセージに `#N`（GitHub Issue番号）を含める
