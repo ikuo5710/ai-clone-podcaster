@@ -258,21 +258,6 @@ src/
 
 ## 特殊ディレクトリ
 
-### .steering/ (ステアリングファイル)
-
-**役割**: 特定の開発作業における「今回何をするか」を定義
-
-**構造**:
-```
-.steering/
-└── [YYYYMMDD]-[task-name]/
-    ├── requirements.md      # 今回の作業の要求内容
-    ├── design.md            # 変更内容の設計
-    └── tasklist.md          # タスクリスト
-```
-
-**命名規則**: `20250115-add-user-profile` 形式
-
 ### .claude/ (Claude Code設定)
 
 **役割**: Claude Code設定とカスタマイズ
@@ -293,7 +278,6 @@ src/
 - `node_modules/`
 - `dist/`
 - `.env`
-- `.steering/` (タスク管理用の一時ファイル)
 - `*.log`
 - `.DS_Store`
 
@@ -302,5 +286,4 @@ src/
 ツールで除外すべきファイル:
 - `dist/`
 - `node_modules/`
-- `.steering/`
 - `coverage/`

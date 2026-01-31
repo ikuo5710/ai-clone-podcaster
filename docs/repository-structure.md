@@ -30,7 +30,6 @@ ai-clone-podcaster/
 │   └── output/                # 生成済みポッドキャスト
 ├── docs/                      # プロジェクトドキュメント
 │   └── ideas/                 # アイデア・壁打ちメモ
-├── .steering/                 # 作業単位のステアリングファイル
 ├── .claude/                   # Claude Code設定
 ├── .env                       # 環境変数（gitignore対象）
 ├── .env.example               # 環境変数テンプレート
@@ -318,6 +317,5 @@ coverage/
 dist/
 node_modules/
 data/
-.steering/
 coverage/
 ```

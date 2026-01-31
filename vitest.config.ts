@@ -15,7 +15,6 @@ export default defineConfig({
       exclude: [
         'node_modules/**',
         'dist/**',
-        '.steering/**',
         '**/*.config.{ts,js}',
         '**/types/**',
         'tests/e2e/**',
