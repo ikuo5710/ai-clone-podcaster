@@ -7,6 +7,7 @@ const MAX_BGM_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const props = defineProps<{
   script: string;
   selectedVoiceId: string;
+  styleInstruction: string;
   bgmFile: File | null;
   bgmVolume: number;
   isSubmitting: boolean;
@@ -16,6 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:script': [value: string];
   'update:selectedVoiceId': [value: string];
+  'update:styleInstruction': [value: string];
   'update:bgmFile': [value: File | null];
   'update:bgmVolume': [value: number];
   submit: [];
@@ -90,6 +92,20 @@ defineExpose({ fetchVoices });
     </div>
 
     <div class="field">
+      <label for="style-instruction">スタイル指示（任意）</label>
+      <input
+        id="style-instruction"
+        :value="styleInstruction"
+        type="text"
+        placeholder="例: ゆっくり落ち着いたトーンで / excited tone"
+        class="text-input"
+        :disabled="hasJob"
+        @input="emit('update:styleInstruction', ($event.target as HTMLInputElement).value)"
+      />
+      <p class="hint">声のトーン、スピード、感情などを自然言語で指定できます</p>
+    </div>
+
+    <div class="field">
       <label for="bgm">BGM（任意）</label>
       <input
         id="bgm"
@@ -154,6 +170,16 @@ defineExpose({ fetchVoices });
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
+  box-sizing: border-box;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
   box-sizing: border-box;
 }
 

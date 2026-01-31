@@ -7,6 +7,7 @@ const POLL_INTERVAL_MS = 2000;
 export function usePodcastCreator() {
   const script = ref('');
   const selectedVoiceId = ref('');
+  const styleInstruction = ref('');
   const bgmFile = ref<File | null>(null);
   const bgmVolume = ref(0.3);
 
@@ -28,6 +29,9 @@ export function usePodcastCreator() {
       const formData = new FormData();
       formData.append('script', script.value.trim());
       formData.append('voiceId', selectedVoiceId.value);
+      if (styleInstruction.value.trim()) {
+        formData.append('styleInstruction', styleInstruction.value.trim());
+      }
       formData.append('bgmVolume', String(bgmVolume.value));
       if (bgmFile.value) {
         formData.append('bgm', bgmFile.value);
@@ -79,6 +83,7 @@ export function usePodcastCreator() {
     stopPolling();
     script.value = '';
     selectedVoiceId.value = '';
+    styleInstruction.value = '';
     bgmFile.value = null;
     bgmVolume.value = 0.3;
     jobId.value = null;
@@ -94,6 +99,7 @@ export function usePodcastCreator() {
   return {
     script,
     selectedVoiceId,
+    styleInstruction,
     bgmFile,
     bgmVolume,
     jobId,

@@ -92,6 +92,45 @@ describe('PodcastController', () => {
       expect(['pending', 'tts_processing']).toContain(json.status);
     });
 
+    it('styleInstructionを含むリクエストでジョブに保存される', async () => {
+      const voiceId = await registerVoice();
+
+      const formData = new FormData();
+      formData.append('script', 'これはテスト台本です');
+      formData.append('voiceId', voiceId);
+      formData.append('styleInstruction', 'ゆっくり落ち着いたトーンで');
+
+      const res = await app.request('/api/podcasts', {
+        method: 'POST',
+        body: formData,
+      });
+
+      expect(res.status).toBe(202);
+      const json = (await res.json()) as { id: string };
+      const jobs = getJobs();
+      const job = jobs.get(json.id);
+      expect(job?.styleInstruction).toBe('ゆっくり落ち着いたトーンで');
+    });
+
+    it('styleInstruction未指定の場合undefinedになる', async () => {
+      const voiceId = await registerVoice();
+
+      const formData = new FormData();
+      formData.append('script', 'これはテスト台本です');
+      formData.append('voiceId', voiceId);
+
+      const res = await app.request('/api/podcasts', {
+        method: 'POST',
+        body: formData,
+      });
+
+      expect(res.status).toBe(202);
+      const json = (await res.json()) as { id: string };
+      const jobs = getJobs();
+      const job = jobs.get(json.id);
+      expect(job?.styleInstruction).toBeUndefined();
+    });
+
     it('台本が空で400を返す', async () => {
       const voiceId = await registerVoice();
 

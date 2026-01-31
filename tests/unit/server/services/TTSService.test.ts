@@ -81,6 +81,77 @@ describe('TTSService', () => {
       await fs.unlink(result);
     });
 
+    it('styleInstructionありでstyle_instructionがAPIに渡される', async () => {
+      // Given
+      const fakeAudioUrl = 'https://example.com/fake-audio.wav';
+      mockReplicate.run.mockResolvedValue(fakeAudioUrl);
+
+      const fakeAudioData = Buffer.from('fake wav audio data');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(fakeAudioData.buffer),
+      });
+
+      const voiceFilePath = path.join(TEMP_DIR, 'test-job-voice-style.webm');
+      await fs.writeFile(voiceFilePath, Buffer.from('fake voice data'));
+
+      // When
+      const result = await service.generateSpeech(
+        'テスト台本です',
+        voiceFilePath,
+        'test-job-style-001',
+        'ゆっくり落ち着いたトーンで'
+      );
+
+      // Then
+      expect(mockReplicate.run).toHaveBeenCalledWith('qwen/qwen3-tts', {
+        input: expect.objectContaining({
+          style_instruction: 'ゆっくり落ち着いたトーンで',
+        }),
+      });
+      expect(result).toBe(
+        path.join(TEMP_DIR, 'test-job-style-001-tts.wav')
+      );
+
+      // クリーンアップ
+      await fs.unlink(voiceFilePath);
+      await fs.unlink(result);
+    });
+
+    it('styleInstructionなしでstyle_instructionがAPIに渡されない', async () => {
+      // Given
+      const fakeAudioUrl = 'https://example.com/fake-audio.wav';
+      mockReplicate.run.mockResolvedValue(fakeAudioUrl);
+
+      const fakeAudioData = Buffer.from('fake wav audio data');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(fakeAudioData.buffer),
+      });
+
+      const voiceFilePath = path.join(TEMP_DIR, 'test-job-voice-nostyle.webm');
+      await fs.writeFile(voiceFilePath, Buffer.from('fake voice data'));
+
+      // When
+      await service.generateSpeech(
+        'テスト台本です',
+        voiceFilePath,
+        'test-job-nostyle-001'
+      );
+
+      // Then: style_instruction が含まれないことを確認
+      const callArgs = mockReplicate.run.mock.calls[0][1] as {
+        input: Record<string, string>;
+      };
+      expect(callArgs.input).not.toHaveProperty('style_instruction');
+
+      // クリーンアップ
+      await fs.unlink(voiceFilePath);
+      await fs.unlink(
+        path.join(TEMP_DIR, 'test-job-nostyle-001-tts.wav')
+      );
+    });
+
     it('API失敗時にエラーをスローする', async () => {
       // Given: Replicate APIがエラー
       mockReplicate.run.mockRejectedValue(new Error('API rate limit exceeded'));
