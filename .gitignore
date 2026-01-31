@@ -43,10 +43,6 @@ test-results/
 # Resources (large binary files)
 resource/
 
-# Steering files (task management - temporary)
-.steering/*
-!.steering/.gitkeep
-
 # Lock files (keep package-lock.json for consistency)
 # yarn.lock
 
