@@ -10,6 +10,7 @@ export interface PodcastJob {
   status: JobStatus;
   script: string;
   voiceId: string;
+  styleInstruction?: string;
   bgmFileName?: string;
   bgmVolume: number;
   outputFileName?: string;

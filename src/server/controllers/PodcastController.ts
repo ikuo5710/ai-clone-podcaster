@@ -63,6 +63,13 @@ export function createPodcastRoutes(
       }
     }
 
+    // スタイル指示（任意）
+    const styleInstructionRaw = body['styleInstruction'];
+    const styleInstruction =
+      typeof styleInstructionRaw === 'string' && styleInstructionRaw.trim().length > 0
+        ? styleInstructionRaw.trim()
+        : undefined;
+
     // BGMファイル（任意）
     let bgmFileName: string | undefined;
     const bgm = body['bgm'];
@@ -88,6 +95,7 @@ export function createPodcastRoutes(
       status: 'pending',
       script: script.trim(),
       voiceId,
+      styleInstruction,
       bgmFileName,
       bgmVolume,
       createdAt: new Date().toISOString(),
@@ -168,7 +176,8 @@ async function processJob(
     const ttsOutputPath = await ttsService.generateSpeech(
       job.script,
       voiceFilePath,
-      job.id
+      job.id,
+      job.styleInstruction
     );
 
     // BGM合成 or mp3変換

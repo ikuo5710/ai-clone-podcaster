@@ -19,12 +19,14 @@ export class TTSService {
    * @param script - 台本テキスト
    * @param voiceFilePath - クローン元の声ファイルパス
    * @param jobId - ジョブID（一時ファイル名に使用）
+   * @param styleInstruction - スタイル指示（声のトーン・スピード・感情等、任意）
    * @returns 生成された音声ファイルのパス（data/temp/{jobId}-tts.wav）
    */
   async generateSpeech(
     script: string,
     voiceFilePath: string,
-    jobId: string
+    jobId: string,
+    styleInstruction?: string
   ): Promise<string> {
     await fs.mkdir(TEMP_DIR, { recursive: true });
 
@@ -34,15 +36,18 @@ export class TTSService {
     const mimeType = this.guessMimeType(voiceFilePath);
     const dataUri = `data:${mimeType};base64,${base64}`;
 
-    const output = await this.replicate.run('qwen/qwen3-tts', {
-      input: {
-        text: script,
-        mode: 'voice_clone',
-        reference_audio: dataUri,
-        reference_text: '',
-        language: 'auto',
-      },
-    });
+    const input: Record<string, string> = {
+      text: script,
+      mode: 'voice_clone',
+      reference_audio: dataUri,
+      reference_text: '',
+      language: 'auto',
+    };
+    if (styleInstruction) {
+      input['style_instruction'] = styleInstruction;
+    }
+
+    const output = await this.replicate.run('qwen/qwen3-tts', { input });
 
     // outputはURIを含むReadableStreamまたはURL文字列
     const audioUrl = this.extractAudioUrl(output);

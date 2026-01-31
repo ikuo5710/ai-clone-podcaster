@@ -14,6 +14,7 @@ const podcastFormRef = ref<InstanceType<typeof PodcastForm> | null>(null);
 const {
   script,
   selectedVoiceId,
+  styleInstruction,
   bgmFile,
   bgmVolume,
   jobId,
@@ -63,6 +64,7 @@ function handleReset() {
         ref="podcastFormRef"
         v-model:script="script"
         v-model:selected-voice-id="selectedVoiceId"
+        v-model:style-instruction="styleInstruction"
         v-model:bgm-file="bgmFile"
         v-model:bgm-volume="bgmVolume"
         :is-submitting="isSubmitting"

@@ -58,6 +58,7 @@ interface PodcastJob {
   status: JobStatus;       // 生成ジョブの状態
   script: string;          // 台本テキスト
   voiceId: string;         // 使用する声のID
+  styleInstruction?: string; // スタイル指示（任意、声のトーン・スピード・感情等）
   bgmFileName?: string;    // BGMファイル名（任意）
   bgmVolume: number;       // BGM音量（0.0-1.0、デフォルト0.3）
   outputFileName?: string; // 生成されたmp3ファイル名
@@ -184,7 +185,7 @@ class PodcastController {
 
 ```typescript
 class TTSService {
-  generateSpeech(script: string, voiceFilePath: string): Promise<Buffer>;
+  generateSpeech(script: string, voiceFilePath: string, jobId: string, styleInstruction?: string): Promise<string>;
 }
 ```
 
@@ -257,7 +258,7 @@ sequenceDiagram
 
     User->>Vue: 台本入力 + 声選択 + BGMアップロード
     User->>Vue: 生成ボタン押下
-    Vue->>API: POST /api/podcasts (script, voiceId, bgm, bgmVolume)
+    Vue->>API: POST /api/podcasts (script, voiceId, styleInstruction, bgm, bgmVolume)
     API-->>Vue: 202 Accepted (jobId)
     Vue->>Vue: ポーリング開始
 
@@ -376,6 +377,7 @@ stateDiagram-v2
 **リクエスト**: `multipart/form-data`
 - `script`: 台本テキスト（文字列）
 - `voiceId`: 使用する声のID（文字列）
+- `styleInstruction`: スタイル指示（任意、声のトーン・スピード・感情等を自然言語で指定）
 - `bgm`: BGMファイル（任意）
 - `bgmVolume`: BGM音量 0.0-1.0（任意、デフォルト0.3）
 
